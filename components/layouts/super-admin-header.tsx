@@ -26,7 +26,7 @@ export default function AdminHeader() {
           })}
         </p>
       </div>
-      <div className="flex flex-row items-center gap-3">
+      <div className="flex flex-row items-center gap-3 pr-6">
         <Image className="w-5 h-5" src={BellIcon.src} alt="bell-icon" />
         <Code color="success">Super Admin</Code>
         <Image

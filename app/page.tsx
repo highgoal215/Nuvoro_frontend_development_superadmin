@@ -26,7 +26,7 @@ export default function SuperAdminPage() {
 
     // Simulate login - Replace with actual authentication
     if (email && password) {
-      router.push("/pages/admins/admin-dashboard");
+      router.push("/dashboard");
       console.log("success!");
     } else {
       console.log("failed!");
