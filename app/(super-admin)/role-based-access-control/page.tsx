@@ -1,26 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@heroui/button";
 import {
+  Button,
   Table,
   TableBody,
   TableCell,
   TableColumn,
   TableHeader,
   TableRow,
-} from "@heroui/table";
-import { Tooltip } from "@heroui/tooltip";
-import { cn } from "@heroui/theme";
-import {
+  Tooltip,
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-} from "@heroui/dropdown";
-import { Avatar, AvatarGroup } from "@heroui/avatar";
+  Avatar,
+  AvatarGroup,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "@nextui-org/react";
 import { ChevronDown, Edit, Plus, Search, Trash2 } from "lucide-react";
-
+import AddRole from "@/components/Modals/AddRole";
 import MyInput from "@/components/my-input";
 
 interface Role {
@@ -43,9 +46,6 @@ const initialRoles: Role[] = [
       { name: "John Doe", avatar: "https://i.pravatar.cc/150?u=1" },
       { name: "Jane Smith", avatar: "https://i.pravatar.cc/150?u=2" },
       { name: "Bob Johnson", avatar: "https://i.pravatar.cc/150?u=3" },
-      { name: "John Doe", avatar: "https://i.pravatar.cc/150?u=1" },
-      { name: "Jane Smith", avatar: "https://i.pravatar.cc/150?u=2" },
-      { name: "Bob Johnson", avatar: "https://i.pravatar.cc/150?u=3" },
     ],
     lastModified: "2 days ago",
   },
@@ -54,8 +54,6 @@ const initialRoles: Role[] = [
     name: "System Admin",
     description: "System configuration and maintenance access",
     members: [
-      { name: "Alice Brown", avatar: "https://i.pravatar.cc/150?u=4" },
-      { name: "Charlie Davis", avatar: "https://i.pravatar.cc/150?u=5" },
       { name: "Alice Brown", avatar: "https://i.pravatar.cc/150?u=4" },
       { name: "Charlie Davis", avatar: "https://i.pravatar.cc/150?u=5" },
     ],
@@ -67,15 +65,95 @@ export default function RoleBasedAccessControl() {
   const [roles, setRoles] = useState<Role[]>(initialRoles);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRole, setSelectedRole] = useState<string>("all");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedRoleForEdit, setSelectedRoleForEdit] = useState<Role | null>(
+    null
+  );
+  const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
 
   const filteredRoles = roles.filter(
     (role) =>
       role.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      (selectedRole === "all" || role.name === selectedRole),
+      (selectedRole === "all" || role.name === selectedRole)
   );
 
-  const handleDelete = (id: string) => {
-    setRoles(roles.filter((role) => role.id !== id));
+  const handleAddRole = (roleData: { name: string; description: string }) => {
+    // Check if role with same name exists
+    const existingRoleIndex = roles.findIndex(
+      (role) => role.name.toLowerCase() === roleData.name.toLowerCase()
+    );
+
+    if (existingRoleIndex !== -1) {
+      // If role exists, update its member count and last modified
+      setRoles(
+        roles.map((role, index) =>
+          index === existingRoleIndex
+            ? {
+                ...role,
+                members: [
+                  ...role.members,
+                  {
+                    name: `New Member ${role.members.length + 1}`,
+                    avatar: `https://i.pravatar.cc/150?u=${Date.now()}`,
+                  },
+                ],
+                lastModified: "Just now",
+              }
+            : role
+        )
+      );
+    } else {
+      // If role doesn't exist, create new role
+      const newRole: Role = {
+        id: Date.now().toString(),
+        name: roleData.name,
+        description: roleData.description,
+        members: [
+          {
+            name: "New Member 1",
+            avatar: `https://i.pravatar.cc/150?u=${Date.now()}`,
+          },
+        ],
+        lastModified: "Just now",
+      };
+      setRoles([...roles, newRole]);
+    }
+  };
+
+  const handleEditRole = (roleData: { name: string; description: string }) => {
+    if (selectedRoleForEdit) {
+      setRoles(
+        roles.map((role) =>
+          role.id === selectedRoleForEdit.id
+            ? {
+                ...role,
+                name: roleData.name,
+                description: roleData.description,
+                lastModified: "Just now",
+              }
+            : role
+        )
+      );
+    }
+  };
+
+  const handleDelete = () => {
+    if (roleToDelete) {
+      setRoles(roles.filter((role) => role.id !== roleToDelete.id));
+      setIsDeleteModalOpen(false);
+      setRoleToDelete(null);
+    }
+  };
+
+  const openEditModal = (role: Role) => {
+    setSelectedRoleForEdit(role);
+    setIsModalOpen(true);
+  };
+
+  const openDeleteModal = (role: Role) => {
+    setRoleToDelete(role);
+    setIsDeleteModalOpen(true);
   };
 
   return (
@@ -86,7 +164,7 @@ export default function RoleBasedAccessControl() {
             id="search"
             className="h-[42px]"
             classNames={{
-              innerWrapper: cn("pl-8"),
+              innerWrapper: "pl-8",
             }}
             type="text"
             placeholder="Enter your email"
@@ -123,10 +201,62 @@ export default function RoleBasedAccessControl() {
           className="bg-black text-white h-[42px]"
           radius="sm"
           startContent={<Plus className="h-4 w-4" />}
+          color="secondary"
+          onPress={() => {
+            setSelectedRoleForEdit(null);
+            setIsModalOpen(true);
+          }}
         >
           Add New Role
         </Button>
       </div>
+
+      <AddRole
+        isOpen={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onSubmit={selectedRoleForEdit ? handleEditRole : handleAddRole}
+        mode={selectedRoleForEdit ? "edit" : "add"}
+        role={selectedRoleForEdit || undefined}
+      />
+
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        backdrop="opaque"
+        classNames={{
+          body: "py-6",
+          backdrop: "bg-[#292f46]/50 backdrop-opacity-40",
+          base: "border-[#292f46] bg-[#19172c] dark:bg-[#19172c] text-[#a8b0d3]",
+          header: "border-b-[1px] border-[#292f46]",
+          footer: "border-t-[1px] border-[#292f46]",
+          closeButton: "hover:bg-white/5 active:bg-white/10",
+        }}
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                Delete Role
+              </ModalHeader>
+              <ModalBody>
+                <p>
+                  Are you sure you want to delete this role? This action cannot
+                  be undone.
+                </p>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="default" variant="light" onPress={onClose}>
+                  Cancel
+                </Button>
+                <Button color="danger" onPress={handleDelete}>
+                  Delete
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
       <div className="px-4 lg:px-6">
         <Table aria-label="Roles table">
           <TableHeader>
@@ -186,7 +316,12 @@ export default function RoleBasedAccessControl() {
                 <TableCell>
                   <div className="flex gap-2">
                     <Tooltip content="Edit role">
-                      <Button isIconOnly variant="light" size="sm">
+                      <Button
+                        isIconOnly
+                        variant="light"
+                        size="sm"
+                        onPress={() => openEditModal(role)}
+                      >
                         <Edit size={18} />
                       </Button>
                     </Tooltip>
@@ -196,7 +331,7 @@ export default function RoleBasedAccessControl() {
                         variant="light"
                         size="sm"
                         color="danger"
-                        onClick={() => handleDelete(role.id)}
+                        onPress={() => openDeleteModal(role)}
                       >
                         <Trash2 size={18} />
                       </Button>
