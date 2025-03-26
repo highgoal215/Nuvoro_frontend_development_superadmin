@@ -1,32 +1,27 @@
 "use client";
 
 import type { DateValue } from "@react-types/datepicker";
-
 import { useState } from "react";
-import { DateRangePicker } from "@heroui/date-picker";
-import { Chip } from "@heroui/chip";
-import { Button } from "@heroui/button";
-import { CalendarCheck, ChevronDown, Download, Search } from "lucide-react";
 import {
+  DateRangePicker,
+  Button,
+  Chip,
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-} from "@heroui/dropdown";
-import {
   Table,
   TableBody,
   TableCell,
   TableColumn,
   TableHeader,
   TableRow,
-} from "@heroui/table";
-import { Pagination } from "@heroui/pagination";
-import { User } from "@heroui/user";
-import { cn } from "@heroui/theme";
+  Pagination,
+  User,
+} from "@nextui-org/react";
+import { CalendarCheck, ChevronDown, Download, Search } from "lucide-react";
 import { RangeValue } from "@react-types/shared";
 import { parseDate } from "@internationalized/date";
-
 import MyInput from "@/components/my-input";
 
 interface AuditLog {
@@ -76,6 +71,13 @@ export default function ActivityLogging() {
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
 
+   const [isModalOpen, setIsModalOpen] = useState(false);
+   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+   const [selectedRoleForEdit, setSelectedRoleForEdit] = useState<Role | null>(
+     null
+   );
+   const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
+
   const filteredLogs = logs.filter((log) => {
     const matchesSearch =
       log.adminName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -89,7 +91,7 @@ export default function ActivityLogging() {
   const pages = Math.ceil(filteredLogs.length / rowsPerPage);
   const items = filteredLogs.slice(
     (page - 1) * rowsPerPage,
-    page * rowsPerPage,
+    page * rowsPerPage
   );
 
   const getActionChip = (action: string) => {
@@ -129,8 +131,8 @@ export default function ActivityLogging() {
           <DateRangePicker
             className="w-[248px]"
             classNames={{
-              input: cn("text-sm"),
-              inputWrapper: cn("h-[42px] border bg-white"),
+              input: "text-sm",
+              inputWrapper: "h-[42px] border bg-white",
             }}
             aria-label="Date range picker"
             radius="sm"
@@ -168,7 +170,7 @@ export default function ActivityLogging() {
             id="search"
             className="h-[42px] w-60"
             classNames={{
-              innerWrapper: cn("pl-8"),
+              innerWrapper: "pl-8",
             }}
             type="text"
             placeholder="Search users..."
@@ -185,7 +187,7 @@ export default function ActivityLogging() {
           className="bg-black text-white h-[42px]"
           radius="sm"
           startContent={<Download size={20} />}
-          onClick={handleExport}
+          onPress={handleExport}
         >
           Export Logs
         </Button>

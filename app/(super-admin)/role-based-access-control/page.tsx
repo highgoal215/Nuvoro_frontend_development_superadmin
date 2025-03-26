@@ -219,44 +219,6 @@ export default function RoleBasedAccessControl() {
         role={selectedRoleForEdit || undefined}
       />
 
-      <Modal
-        isOpen={isDeleteModalOpen}
-        onOpenChange={setIsDeleteModalOpen}
-        backdrop="opaque"
-        classNames={{
-          body: "py-6",
-          backdrop: "bg-[#292f46]/50 backdrop-opacity-40",
-          base: "border-[#292f46] bg-[#19172c] dark:bg-[#19172c] text-[#a8b0d3]",
-          header: "border-b-[1px] border-[#292f46]",
-          footer: "border-t-[1px] border-[#292f46]",
-          closeButton: "hover:bg-white/5 active:bg-white/10",
-        }}
-      >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">
-                Delete Role
-              </ModalHeader>
-              <ModalBody>
-                <p>
-                  Are you sure you want to delete this role? This action cannot
-                  be undone.
-                </p>
-              </ModalBody>
-              <ModalFooter>
-                <Button color="default" variant="light" onPress={onClose}>
-                  Cancel
-                </Button>
-                <Button color="danger" onPress={handleDelete}>
-                  Delete
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
-
       <div className="px-4 lg:px-6">
         <Table aria-label="Roles table">
           <TableHeader>

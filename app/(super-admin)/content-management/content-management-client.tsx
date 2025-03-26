@@ -33,8 +33,16 @@ import {
 import { Pagination } from "@heroui/pagination";
 import { Tooltip } from "@heroui/tooltip";
 import { cn } from "@heroui/theme";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "@heroui/modal";
 
 import MyInput from "@/components/my-input";
+import Content_AddRole from "@/components/Modals/Content_Addmodal";
 
 interface ContentItem {
   id: string;
@@ -78,6 +86,67 @@ export default function ContentManagementClient() {
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [selectedRows, setSelectedRows] = useState<Selection>(new Set([]));
+
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedContentForEdit, setSelectedContentForEdit] =
+    useState<ContentItem | null>(null);
+  const [contentToDelete, setContentToDelete] = useState<ContentItem | null>(
+    null
+  );
+
+  const handleAddContent = (contentData: {
+    Title: string;
+    Type: string;
+    Author: string;
+    Status: string;
+    Lastupdated: string;
+  }) => {
+    const newContent: ContentItem = {
+      id: Date.now().toString(),
+      title: contentData.Title,
+      type: contentData.Type as "Job" | "Course" | "Project" | "News",
+      author: contentData.Author,
+      status: contentData.Status as "Published" | "Draft" | "Pending",
+      lastUpdated: contentData.Lastupdated,
+    };
+    setContent([...content, newContent]);
+  };
+
+  const handleEditContent = (contentData: {
+    Title: string;
+    Type: string;
+    Author: string;
+    Status: string;
+    Lastupdated: string;
+  }) => {
+    if (selectedContentForEdit) {
+      setContent(
+        content.map((item) =>
+          item.id === selectedContentForEdit.id
+            ? {
+                ...item,
+                title: contentData.Title,
+                type: contentData.Type as "Job" | "Course" | "Project" | "News",
+                author: contentData.Author,
+                status: contentData.Status as "Published" | "Draft" | "Pending",
+                lastUpdated: contentData.Lastupdated,
+              }
+            : item
+        )
+      );
+    }
+  };
+
+  const openEditModal = (item: ContentItem) => {
+    setSelectedContentForEdit(item);
+    setIsModalOpen(true);
+  };
+
+  const resetForm = () => {
+    setSelectedContentForEdit(null);
+    setContentToDelete(null);
+  };
 
   const stats: StatCard[] = [
     {
@@ -129,7 +198,10 @@ export default function ContentManagementClient() {
       Draft: { color: "warning", variant: "flat" },
       Pending: { color: "primary", variant: "flat" },
     };
-    const config = statusConfig[status as keyof typeof statusConfig];
+    const config = statusConfig[status as keyof typeof statusConfig] || {
+      color: "default",
+      variant: "flat",
+    };
 
     return (
       <Chip
@@ -170,10 +242,37 @@ export default function ContentManagementClient() {
           className="bg-black text-white h-[42px]"
           radius="sm"
           startContent={<Plus className="h-4 w-4" />}
+          onPress={() => {
+            resetForm();
+            setIsModalOpen(true);
+          }}
         >
-          Add New Role
+          Add New Content
         </Button>
       </div>
+
+      {/* Add/Edit Content Modal */}
+      <Content_AddRole
+        isOpen={isModalOpen}
+        mode={selectedContentForEdit ? "edit" : "add"}
+        role={
+          selectedContentForEdit
+            ? {
+                Title: selectedContentForEdit.title,
+                Type: selectedContentForEdit.type,
+                Author: selectedContentForEdit.author,
+                Status: selectedContentForEdit.status,
+                lastUpdated: selectedContentForEdit.lastUpdated,
+              }
+            : undefined
+        }
+        onOpenChange={(open) => {
+          setIsModalOpen(open);
+          if (!open) resetForm();
+        }}
+        onSubmit={selectedContentForEdit ? handleEditContent : handleAddContent}
+      />
+
       <div className="px-4 lg:px-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -298,7 +397,12 @@ export default function ContentManagementClient() {
                 <TableCell>
                   <div className="flex gap-2">
                     <Tooltip content="Edit">
-                      <Button isIconOnly variant="light" size="sm">
+                      <Button
+                        isIconOnly
+                        variant="light"
+                        size="sm"
+                        onPress={() => openEditModal(item)}
+                      >
                         <Edit2 size={18} />
                       </Button>
                     </Tooltip>
