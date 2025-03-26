@@ -151,11 +151,6 @@ export default function RoleBasedAccessControl() {
     setIsModalOpen(true);
   };
 
-  const openDeleteModal = (role: Role) => {
-    setRoleToDelete(role);
-    setIsDeleteModalOpen(true);
-  };
-
   return (
     <div className="relative flex-1 space-y-6">
       <div className="flex flex-row justify-between items-center px-4 lg:px-6 pt-4 lg:pt-6">
@@ -293,7 +288,7 @@ export default function RoleBasedAccessControl() {
                         variant="light"
                         size="sm"
                         color="danger"
-                        onPress={() => openDeleteModal(role)}
+                        onPress={() => handleDelete()}
                       >
                         <Trash2 size={18} />
                       </Button>

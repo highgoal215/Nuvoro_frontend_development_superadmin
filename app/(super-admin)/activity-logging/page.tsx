@@ -71,12 +71,12 @@ export default function ActivityLogging() {
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
 
-   const [isModalOpen, setIsModalOpen] = useState(false);
-   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-   const [selectedRoleForEdit, setSelectedRoleForEdit] = useState<Role | null>(
-     null
-   );
-   const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedRoleForEdit, setSelectedRoleForEdit] = useState<Role | null>(
+    null
+  );
+  const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
 
   const filteredLogs = logs.filter((log) => {
     const matchesSearch =
@@ -140,7 +140,7 @@ export default function ActivityLogging() {
             selectorIcon={
               <CalendarCheck className="min-w-4 min-h-4 w-4 h-4" size={16} />
             }
-            value={dateValue}
+            // value={dateValue}
             onChange={setDateValue}
           />
           <Dropdown>
