@@ -71,12 +71,6 @@ export default function ActivityLogging() {
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
 
-  // const [isModalOpen, setIsModalOpen] = useState(false);
-  // const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  // const [selectedRoleForEdit, setSelectedRoleForEdit] = useState<Role | null>(
-  //   null
-  // );
-  // const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
 
   const filteredLogs = logs.filter((log) => {
     const matchesSearch =
