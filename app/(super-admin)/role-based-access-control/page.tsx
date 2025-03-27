@@ -16,11 +16,6 @@ import {
   DropdownTrigger,
   Avatar,
   AvatarGroup,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
 } from "@nextui-org/react";
 import { ChevronDown, Edit, Plus, Search, Trash2 } from "lucide-react";
 import AddRole from "@/components/Modals/AddRole";
