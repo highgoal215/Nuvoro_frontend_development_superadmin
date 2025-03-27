@@ -65,7 +65,7 @@ export default function RoleBasedAccessControl() {
   const [selectedRoleForEdit, setSelectedRoleForEdit] = useState<Role | null>(
     null
   );
-  const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
+  // const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
 
   const filteredRoles = roles.filter(
     (role) =>
@@ -133,13 +133,13 @@ export default function RoleBasedAccessControl() {
     }
   };
 
-  const handleDelete = () => {
-    if (roleToDelete) {
-      setRoles(roles.filter((role) => role.id !== roleToDelete.id));
-      setIsDeleteModalOpen(false);
-      setRoleToDelete(null);
-    }
-  };
+  // const handleDelete = () => {
+  //   if (roleToDelete) {
+  //     setRoles(roles.filter((role) => role.id !== roleToDelete.id));
+  //     setIsDeleteModalOpen(false);
+  //     setRoleToDelete(null);
+  //   }
+  // };
 
   const openEditModal = (role: Role) => {
     setSelectedRoleForEdit(role);
@@ -207,6 +207,14 @@ export default function RoleBasedAccessControl() {
         onSubmit={selectedRoleForEdit ? handleEditRole : handleAddRole}
         mode={selectedRoleForEdit ? "edit" : "add"}
         role={selectedRoleForEdit || undefined}
+        onDelete={(roleId) => {
+          setRoles((prevRoles) =>
+            prevRoles.filter((role) => role.id !== roleId)
+          );
+          setIsDeleteModalOpen(false);
+        }}
+        isDeleteModalOpen={isDeleteModalOpen}
+        onDeleteModalChange={setIsDeleteModalOpen}
       />
 
       <div className="px-4 lg:px-6">
@@ -283,7 +291,10 @@ export default function RoleBasedAccessControl() {
                         variant="light"
                         size="sm"
                         color="danger"
-                        onPress={() => handleDelete()}
+                        onPress={() => {
+                          setSelectedRoleForEdit(role);
+                          setIsDeleteModalOpen(true);
+                        }}
                       >
                         <Trash2 size={18} />
                       </Button>
@@ -313,7 +324,6 @@ export default function RoleBasedAccessControl() {
         className="absolute bottom-4 right-4 bg-black text-white text-xl"
         radius="sm"
         isIconOnly
-       
       >
         ?
       </Button>

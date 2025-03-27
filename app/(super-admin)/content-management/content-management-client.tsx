@@ -33,13 +33,7 @@ import {
 import { Pagination } from "@heroui/pagination";
 import { Tooltip } from "@heroui/tooltip";
 import { cn } from "@heroui/theme";
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@heroui/modal";
+import {} from "@heroui/modal";
 
 import MyInput from "@/components/my-input";
 import Content_AddRole from "@/components/Modals/Content_Addmodal";
@@ -94,6 +88,7 @@ export default function ContentManagementClient() {
   const [contentToDelete, setContentToDelete] = useState<ContentItem | null>(
     null
   );
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const handleAddContent = (contentData: {
     Title: string;
@@ -138,9 +133,20 @@ export default function ContentManagementClient() {
     }
   };
 
+  const handleDeleteContent = (contentId: string) => {
+    setContent(content.filter((item) => item.id !== contentId));
+    setIsDeleteModalOpen(false);
+    setContentToDelete(null);
+  };
+
   const openEditModal = (item: ContentItem) => {
     setSelectedContentForEdit(item);
     setIsModalOpen(true);
+  };
+
+  const openDeleteModal = (item: ContentItem) => {
+    setContentToDelete(item);
+    setIsDeleteModalOpen(true);
   };
 
   const resetForm = () => {
@@ -256,21 +262,36 @@ export default function ContentManagementClient() {
         isOpen={isModalOpen}
         mode={selectedContentForEdit ? "edit" : "add"}
         role={
-          selectedContentForEdit
-            ? {
-                Title: selectedContentForEdit.title,
-                Type: selectedContentForEdit.type,
-                Author: selectedContentForEdit.author,
-                Status: selectedContentForEdit.status,
-                lastUpdated: selectedContentForEdit.lastUpdated,
-              }
-            : undefined
+          isDeleteModalOpen
+            ? contentToDelete
+              ? {
+                  id: contentToDelete.id,
+                  Title: contentToDelete.title,
+                  Type: contentToDelete.type,
+                  Author: contentToDelete.author,
+                  Status: contentToDelete.status,
+                  lastUpdated: contentToDelete.lastUpdated,
+                }
+              : undefined
+            : selectedContentForEdit
+              ? {
+                  id: selectedContentForEdit.id,
+                  Title: selectedContentForEdit.title,
+                  Type: selectedContentForEdit.type,
+                  Author: selectedContentForEdit.author,
+                  Status: selectedContentForEdit.status,
+                  lastUpdated: selectedContentForEdit.lastUpdated,
+                }
+              : undefined
         }
         onOpenChange={(open) => {
           setIsModalOpen(open);
           if (!open) resetForm();
         }}
         onSubmit={selectedContentForEdit ? handleEditContent : handleAddContent}
+        isDeleteModalOpen={isDeleteModalOpen}
+        onDeleteModalChange={setIsDeleteModalOpen}
+        onDelete={handleDeleteContent}
       />
 
       <div className="px-4 lg:px-6">
@@ -412,6 +433,7 @@ export default function ContentManagementClient() {
                         variant="light"
                         size="sm"
                         color="danger"
+                        onPress={() => openDeleteModal(item)}
                       >
                         <Trash2 size={18} />
                       </Button>
