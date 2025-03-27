@@ -32,6 +32,7 @@ import {
 import { useState } from "react";
 
 import MyInput from "@/components/my-input";
+import User_managementModal from "@/components/Modals/User_management";
 
 interface UserData {
   id: string;
@@ -69,6 +70,12 @@ export default function UserManagement() {
   const [page, setPage] = useState(1);
   const rowsPerPage = 10;
 
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UserData | undefined>();
+  const [modalMode, setModalMode] = useState<"add" | "edit">("add");
+
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -83,7 +90,7 @@ export default function UserManagement() {
   const pages = Math.ceil(filteredUsers.length / rowsPerPage);
   const items = filteredUsers.slice(
     (page - 1) * rowsPerPage,
-    page * rowsPerPage,
+    page * rowsPerPage
   );
 
   const getTypeChip = (type: string) => {
@@ -112,6 +119,47 @@ export default function UserManagement() {
     );
   };
 
+  const handleAddUser = () => {
+    setModalMode("add");
+    setSelectedUser(undefined);
+    setIsModalOpen(true);
+  };
+
+  const handleEditUser = (user: UserData) => {
+    setModalMode("edit");
+    setSelectedUser(user);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteUser = (user: UserData) => {
+    setSelectedUser(user);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleSubmit = (userData: Omit<UserData, "id">) => {
+    if (modalMode === "add") {
+      const newUser: UserData = {
+        ...userData,
+        id: Math.random().toString(36).substr(2, 9),
+      };
+      setUsers([...users, newUser]);
+    } else if (selectedUser) {
+      setUsers(
+        users.map((user) =>
+          user.id === selectedUser.id ? { ...userData, id: user.id } : user
+        )
+      );
+    }
+    setIsModalOpen(false);
+    setSelectedUser(undefined);
+  };
+
+  const handleDelete = (userId: string) => {
+    setUsers(users.filter((user) => user.id !== userId));
+    setIsDeleteModalOpen(false);
+    setSelectedUser(undefined);
+  };
+
   return (
     <div className="relative flex-1 space-y-6">
       <div className="flex flex-row justify-between items-center w-full px-4 lg:px-6 pt-4 lg:pt-6">
@@ -119,6 +167,7 @@ export default function UserManagement() {
           className="bg-black text-white h-[42px]"
           radius="sm"
           startContent={<Plus className="h-4 w-4" />}
+          onPress={handleAddUser}
         >
           Add New Role
         </Button>
@@ -237,7 +286,12 @@ export default function UserManagement() {
                 <TableCell>
                   <div className="flex gap-2">
                     <Tooltip content="Edit user">
-                      <Button isIconOnly variant="light" size="sm">
+                      <Button
+                        isIconOnly
+                        variant="light"
+                        size="sm"
+                        onPress={() => handleEditUser(user)}
+                      >
                         <Edit2 size={18} />
                       </Button>
                     </Tooltip>
@@ -247,6 +301,7 @@ export default function UserManagement() {
                         variant="light"
                         size="sm"
                         color="danger"
+                        onPress={() => handleDeleteUser(user)}
                       >
                         <Trash2 size={18} />
                       </Button>
@@ -263,6 +318,17 @@ export default function UserManagement() {
           </TableBody>
         </Table>
       </div>
+
+      <User_managementModal
+        isOpen={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onSubmit={handleSubmit}
+        mode={modalMode}
+        user={selectedUser}
+        onDelete={handleDelete}
+        isDeleteModalOpen={isDeleteModalOpen}
+        onDeleteModalChange={setIsDeleteModalOpen}
+      />
     </div>
   );
 }
